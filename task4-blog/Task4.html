@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Blog</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #f7f7f7;
+      color: #333;
+      line-height: 1.6;
+    }
+
+    header {
+      background: #4a90e2;
+      color: #fff;
+      padding: 20px;
+      text-align: center;
+    }
+
+    header h1 {
+      margin-bottom: 10px;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    input[type="text"], select {
+      padding: 8px;
+      border: none;
+      border-radius: 5px;
+      font-size: 14px;
+    }
+
+    .blog-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+      padding: 20px;
+      max-width: 1200px;
+      margin: auto;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      transition: transform 0.2s;
+    }
+
+    .card:hover {
+      transform: scale(1.02);
+    }
+
+    .card img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+    }
+
+    .card-body {
+      padding: 15px;
+    }
+
+    .card-body h3 {
+      margin-bottom: 8px;
+      font-size: 18px;
+      color: #4a90e2;
+    }
+
+    .card-body p {
+      font-size: 14px;
+      margin-bottom: 10px;
+    }
+
+    .date {
+      font-size: 12px;
+      color: #777;
+    }
+
+    .pagination {
+      text-align: center;
+      margin: 20px;
+    }
+
+    .pagination button {
+      padding: 8px 12px;
+      margin: 0 5px;
+      border: none;
+      border-radius: 5px;
+      background: #4a90e2;
+      color: #fff;
+      cursor: pointer;
+    }
+
+    .pagination button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+
+    footer {
+      background: #333;
+      color: #fff;
+      text-align: center;
+      padding: 15px;
+      margin-top: 30px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>My Blog</h1>
+    <div class="controls">
+      <input type="text" id="searchInput" placeholder="Search posts by title...">
+      <select id="categoryFilter">
+        <option value="all">All Categories</option>
+        <option value="Tech">Tech</option>
+        <option value="Travel">Travel</option>
+        <option value="Food">Food</option>
+      </select>
+    </div>
+  </header>
+
+  <main>
+    <div class="blog-container" id="blogContainer"></div>
+    <div class="pagination">
+      <button id="prevBtn">Prev</button>
+      <button id="nextBtn">Next</button>
+    </div>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 My Blog. All rights reserved.</p>
+  </footer>
+
+  <script>
+const posts = [
+  {
+    title: "Latest Tech Trends",
+    category: "Tech",
+    image: "images/image1.jpg",
+    description: "Exploring the newest technologies shaping our world.",
+    date: "Sep 15, 2025"
+  },
+  {
+    title: "My Trip to Paris",
+    category: "Travel",
+    image: "images/image2.jpg",
+    description: "A wonderful journey through the streets of Paris.",
+    date: "Sep 10, 2025"
+  },
+  {
+    title: "Healthy Eating Tips",
+    category: "Food",
+    image: "images/image3.jpg",
+    description: "Simple ways to keep your meals both tasty and healthy.",
+    date: "Sep 5, 2025"
+  },
+  {
+    title: "AI in Daily Life",
+    category: "Tech",
+    image: "images/image4.jpg",
+    description: "How artificial intelligence is influencing everything.",
+    date: "Aug 28, 2025"
+  }
+];
+
+    const postsPerPage = 3;
+    let currentPage = 1;
+
+    const blogContainer = document.getElementById("blogContainer");
+    const searchInput = document.getElementById("searchInput");
+    const categoryFilter = document.getElementById("categoryFilter");
+    const prevBtn = document.getElementById("prevBtn");
+    const nextBtn = document.getElementById("nextBtn");
+
+    function renderPosts() {
+      blogContainer.innerHTML = "";
+
+      let filteredPosts = posts.filter(post => {
+        const matchesSearch = post.title.toLowerCase().includes(searchInput.value.toLowerCase());
+        const matchesCategory = categoryFilter.value === "all" || post.category === categoryFilter.value;
+        return matchesSearch && matchesCategory;
+      });
+
+      const totalPages = Math.ceil(filteredPosts.length / postsPerPage);
+
+      if (currentPage > totalPages) currentPage = totalPages || 1;
+
+      const start = (currentPage - 1) * postsPerPage;
+      const end = start + postsPerPage;
+      const visiblePosts = filteredPosts.slice(start, end);
+
+      visiblePosts.forEach(post => {
+        const card = document.createElement("div");
+        card.classList.add("card");
+        card.innerHTML = `
+          <img src="${post.image}" alt="${post.title}">
+          <div class="card-body">
+            <h3>${post.title}</h3>
+            <p>${post.description}</p>
+            <div class="date">${post.date} | ${post.category}</div>
+          </div>
+        `;
+        blogContainer.appendChild(card);
+      });
+
+      prevBtn.disabled = currentPage === 1;
+      nextBtn.disabled = currentPage === totalPages || totalPages === 0;
+    }
+
+    searchInput.addEventListener("input", () => {
+      currentPage = 1;
+      renderPosts();
+    });
+
+    categoryFilter.addEventListener("change", () => {
+      currentPage = 1;
+      renderPosts();
+    });
+
+    prevBtn.addEventListener("click", () => {
+      currentPage--;
+      renderPosts();
+    });
+
+    nextBtn.addEventListener("click", () => {
+      currentPage++;
+      renderPosts();
+    });
+
+    renderPosts();
+  </script>
+
+</body>
+</html>
